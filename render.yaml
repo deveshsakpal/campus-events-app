@@ -1,5 +1,5 @@
 services:
-  # 1. Spring Boot Kotlin API Service
+  # Spring Boot Kotlin API
   - type: web
     name: campus-events-api
     runtime: docker
@@ -33,7 +33,7 @@ services:
       - key: ADMIN_NAME
         value: "Campus Events Admin"
 
-  # 2. React Admin & Teacher Portal Static Site
+  # React Admin and Teacher Portal
   - type: web
     name: campus-events-portal
     runtime: static
@@ -46,9 +46,12 @@ services:
         destination: /index.html
     envVars:
       - key: VITE_API_BASE_URL
-        sync: false
+        fromService:
+          name: campus-events-api
+          type: web
+          envVarKey: RENDER_EXTERNAL_URL
 
-  # 3. Flutter Web Student App
+  # Flutter Web Student App
   - type: web
     name: campus-events-student
     runtime: docker
@@ -57,10 +60,12 @@ services:
     plan: free
     envVars:
       - key: API_BASE_URL
-        sync: false
+        fromService:
+          name: campus-events-api
+          type: web
+          envVarKey: RENDER_EXTERNAL_URL
 
 databases:
-  # 4. Managed PostgreSQL Database
   - name: campus-events-db
     databaseName: campus_events
     user: campus_user
