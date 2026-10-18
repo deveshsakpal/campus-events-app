@@ -1,0 +1,67 @@
+services:
+  # 1. Spring Boot Kotlin API Service
+  - type: web
+    name: campus-events-api
+    runtime: docker
+    dockerfilePath: ./api/api/Dockerfile
+    dockerContext: ./api/api
+    plan: free
+    healthCheckPath: /api/health
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: campus-events-db
+          property: connectionString
+      - key: DATABASE_USERNAME
+        fromDatabase:
+          name: campus-events-db
+          property: user
+      - key: DATABASE_PASSWORD
+        fromDatabase:
+          name: campus-events-db
+          property: password
+      - key: JWT_SECRET
+        generateValue: true
+      - key: JWT_EXPIRATION_MS
+        value: "28800000"
+      - key: CORS_ALLOWED_ORIGINS
+        value: "http://localhost:5173,http://localhost:5000,http://localhost:3000,https://*.onrender.com"
+      - key: ADMIN_EMAIL
+        sync: false
+      - key: ADMIN_PASSWORD
+        sync: false
+      - key: ADMIN_NAME
+        value: "Campus Events Admin"
+
+  # 2. React Admin & Teacher Portal Static Site
+  - type: web
+    name: campus-events-portal
+    runtime: static
+    rootDir: admin
+    buildCommand: npm install && npm run build
+    staticPublishPath: dist
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
+    envVars:
+      - key: VITE_API_BASE_URL
+        sync: false
+
+  # 3. Flutter Web Student App
+  - type: web
+    name: campus-events-student
+    runtime: docker
+    dockerfilePath: ./mobile/Dockerfile
+    dockerContext: ./mobile
+    plan: free
+    envVars:
+      - key: API_BASE_URL
+        sync: false
+
+databases:
+  # 4. Managed PostgreSQL Database
+  - name: campus-events-db
+    databaseName: campus_events
+    user: campus_user
+    plan: free

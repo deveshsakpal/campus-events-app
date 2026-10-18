@@ -1,0 +1,9 @@
+.env
+.env.*
+!.env.example
+admin/node_modules/
+admin/dist/
+mobile/.dart_tool/
+mobile/build/
+api/api/.gradle/
+api/api/build/
